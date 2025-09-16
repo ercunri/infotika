@@ -2,19 +2,28 @@
 
 Servo kepala;
 
-#define SERVOPIN 10
+#define SERVOPIN 7
 
-#define kiriMaju 6
-#define kiriMundur 7
-#define kananMaju 4
-#define kananMundur 5
+#define kiriMaju 8
+#define kiriMundur 9
+#define kananMaju 10
+#define kananMundur 11
 #define EN1 12
 #define EN2 13
 
-#define TRIGPIN 8
-#define ECHOPIN 9
+#define TRIGPIN 5
+#define ECHOPIN 6
 
 int jarakDepan, jarakKiri, jarakKanan;
+
+void clearSerial() {
+  String clrscr = "";
+  for (int i = 0; i < 100; i++) {
+    clrscr += "\n";
+  }
+
+  Serial.print(clrscr);
+}
 
 void setup() {
   Serial.begin(9600);
@@ -39,10 +48,47 @@ void setup() {
   bacaJarak();
   delay(500);
 
-  jarakDepan = bacaJarak();
+  //  jarakDepan = bacaJarak();
+  clearSerial();
 }
 
-void loop() {
+void testing() {
+  Serial.println("Sedang mengambil jarak depan....");
+  delay(1000);
+  Serial.print("Jarak depan = ");
+  Serial.print(bacaJarak());
+  Serial.println(" cm");
+  delay(2000);
+
+  clearSerial();
+  delay(2000);
+  kepala.write(175);
+  delay(2000);
+
+  Serial.println("Sedang mengambil jarak kiri....");
+  delay(1000);
+  Serial.print("Jarak kiri = ");
+  Serial.print(bacaJarak());
+  Serial.println(" cm");
+  delay(2000);
+
+  clearSerial();
+  kepala.write(15);
+  delay(2000);
+
+  Serial.println("Sedang mengambil jarak kanan....");
+  delay(1000);
+  Serial.print("Jarak kanan = ");
+  Serial.print(bacaJarak());
+  Serial.println(" cm");
+  delay(2000);
+
+  clearSerial();
+  kepala.write(95);
+  delay(2000);
+}
+
+void looping() {
   if (jarakDepan != 0 && jarakDepan <= 20) {
     berhenti();
     delay(300);
@@ -81,14 +127,10 @@ void loop() {
 
   jarakDepan = bacaJarak();
   delay(50);
+}
 
-  //  Serial.print("Depan: ");
-  //  Serial.println(bacaJarak());
-  //  delay(500);
-  //  Serial.print("Kanan: ");
-  //  Serial.println(lihatKanan());
-  //  delay(500);
-  //  Serial.print("Kiri: ");
-  //  Serial.println(lihatKiri());
-  //  delay(500);
+void loop() {
+  // testing();
+
+  looping();
 }
