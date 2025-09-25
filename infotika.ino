@@ -2,17 +2,17 @@
 
 Servo kepala;
 
-#define SERVOPIN 7
+#define SERVOPIN 10
 
-#define kiriMaju 8
-#define kiriMundur 9
-#define kananMaju 10
-#define kananMundur 11
+#define kiriMaju 6
+#define kiriMundur 7
+#define kananMaju 4
+#define kananMundur 5
 #define EN1 12
 #define EN2 13
 
-#define TRIGPIN 5
-#define ECHOPIN 6
+#define TRIGPIN 8
+#define ECHOPIN 9
 
 int jarakDepan, jarakKiri, jarakKanan;
 
@@ -48,8 +48,8 @@ void setup() {
   bacaJarak();
   delay(500);
 
-  //  jarakDepan = bacaJarak();
-  clearSerial();
+  jarakDepan = bacaJarak();
+  //  clearSerial();
 }
 
 void testing() {
@@ -88,15 +88,16 @@ void testing() {
   delay(2000);
 }
 
+bool isBisaMaju = true;
 void looping() {
-  if (jarakDepan != 0 && jarakDepan <= 20) {
+  if ((jarakDepan != 0 && jarakDepan <= 30) || !isBisaMaju) {
     berhenti();
     delay(300);
 
     analogWrite(EN1, 200);
     analogWrite(EN2, 200);
     mundur();
-    delay(100);
+    delay(50);
 
     berhenti();
     delay(300);
@@ -105,14 +106,18 @@ void looping() {
     delay(500);
     jarakKiri = lihatKiri();
 
-    if (jarakKanan > jarakKiri) {
+    if ((jarakKanan < 30 && jarakKiri < 30)) {
+      isBisaMaju = false;
+    } else if (jarakKanan > jarakKiri) {
       kanan();
-      delay(500);
+      delay(700);
       berhenti();
+      isBisaMaju = true;
     } else {
       kiri();
-      delay(500);
+      delay(700);
       berhenti();
+      isBisaMaju = true;
     }
   } else {
     if (jarakDepan <= 40) {
@@ -122,7 +127,12 @@ void looping() {
       analogWrite(EN1, 220);
       analogWrite(EN2, 220);
     }
-    maju();
+    if (isBisaMaju) {
+      maju();
+    } else {
+      mundur();
+      delay(500);
+    }
   }
 
   jarakDepan = bacaJarak();
