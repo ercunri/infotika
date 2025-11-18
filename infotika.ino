@@ -14,16 +14,7 @@ Servo kepala;
 #define TRIGPIN 8
 #define ECHOPIN 9
 
-int jarakDepan, jarakKiri, jarakKanan;
-
-void clearSerial() {
-  String clrscr = "";
-  for (int i = 0; i < 100; i++) {
-    clrscr += "\n";
-  }
-
-  Serial.print(clrscr);
-}
+int jarakDepan;
 
 void setup() {
   Serial.begin(9600);
@@ -39,108 +30,42 @@ void setup() {
   pinMode(TRIGPIN, OUTPUT);
 
   kepala.attach(SERVOPIN);
-
-  delay(100);
-  kepala.write(95);
-  bacaJarak();
-  delay(500);
-
-  bacaJarak();
-  delay(500);
-
-  jarakDepan = bacaJarak();
-  //  clearSerial();
-}
-
-void testing() {
-  Serial.println("Sedang mengambil jarak depan....");
-  delay(1000);
-  Serial.print("Jarak depan = ");
-  Serial.print(bacaJarak());
-  Serial.println(" cm");
-  delay(2000);
-
-  clearSerial();
-  delay(2000);
-  kepala.write(175);
-  delay(2000);
-
-  Serial.println("Sedang mengambil jarak kiri....");
-  delay(1000);
-  Serial.print("Jarak kiri = ");
-  Serial.print(bacaJarak());
-  Serial.println(" cm");
-  delay(2000);
-
-  clearSerial();
-  kepala.write(15);
-  delay(2000);
-
-  Serial.println("Sedang mengambil jarak kanan....");
-  delay(1000);
-  Serial.print("Jarak kanan = ");
-  Serial.print(bacaJarak());
-  Serial.println(" cm");
-  delay(2000);
-
-  clearSerial();
-  kepala.write(95);
-  delay(2000);
-}
-
-bool isBisaMaju = true;
-void looping() {
-  if ((jarakDepan != 0 && jarakDepan <= 30) || !isBisaMaju) {
-    berhenti();
-    delay(300);
-
-    analogWrite(EN1, 200);
-    analogWrite(EN2, 200);
-    mundur();
-    delay(50);
-
-    berhenti();
-    delay(300);
-
-    jarakKanan = lihatKanan();
-    delay(500);
-    jarakKiri = lihatKiri();
-
-    if ((jarakKanan < 30 && jarakKiri < 30)) {
-      isBisaMaju = false;
-    } else if (jarakKanan > jarakKiri) {
-      kanan();
-      delay(700);
-      berhenti();
-      isBisaMaju = true;
-    } else {
-      kiri();
-      delay(700);
-      berhenti();
-      isBisaMaju = true;
-    }
-  } else {
-    if (jarakDepan <= 40) {
-      analogWrite(EN1, 150);
-      analogWrite(EN2, 150);
-    } else {
-      analogWrite(EN1, 220);
-      analogWrite(EN2, 220);
-    }
-    if (isBisaMaju) {
-      maju();
-    } else {
-      mundur();
-      delay(500);
-    }
-  }
-
-  jarakDepan = bacaJarak();
-  delay(50);
+  kepala.write(95);  // lihat depan
+  delay(300);
 }
 
 void loop() {
-  // testing();
 
-  looping();
+  jarakDepan = bacaJarak();
+  Serial.print("Jarak: ");
+  Serial.print(jarakDepan);
+  Serial.println(" cm");
+
+  // ===========================
+  // LOGIKA FOLLOW OBJECT
+  // ===========================
+
+  if (jarakDepan >= 20 && jarakDepan <= 60) {
+    // objek berada di range follow
+    analogWrite(EN1, 150);
+    analogWrite(EN2, 150);
+    maju();
+    Serial.println("Mengikuti objek...");
+  }
+  else if (jarakDepan < 20) {
+    // terlalu dekat → mundur
+    analogWrite(EN1, 150);
+    analogWrite(EN2, 150);
+    mundur();
+    Serial.println("Terlalu dekat, mundur...");
+    delay(150);
+    berhenti();
+  }
+  else {
+    // tidak ada objek di range follow
+    berhenti();
+    Serial.println("Tidak ada objek dalam jarak follow.");
+  }
+
+  delay(80);
 }
